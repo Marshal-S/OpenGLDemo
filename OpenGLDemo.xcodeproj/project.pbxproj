@@ -7,8 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		661183072844596F00CF3FE2 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 667B83B22840C17800B190F2 /* OpenGL.framework */; };
 		667B83A52840C11800B190F2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 667B83A42840C11800B190F2 /* Assets.xcassets */; };
-		667B83B32840C17800B190F2 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 667B83B22840C17800B190F2 /* OpenGL.framework */; };
 		667B83B52840C17E00B190F2 /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 667B83B42840C17E00B190F2 /* GLUT.framework */; };
 		667B83C72840C24600B190F2 /* libGLTools.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 667B83C62840C24600B190F2 /* libGLTools.a */; };
 		667B83C92840C34100B190F2 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 667B83C82840C34100B190F2 /* main.cpp */; };
@@ -45,7 +45,7 @@
 			files = (
 				667B83C72840C24600B190F2 /* libGLTools.a in Frameworks */,
 				667B83B52840C17E00B190F2 /* GLUT.framework in Frameworks */,
-				667B83B32840C17800B190F2 /* OpenGL.framework in Frameworks */,
+				661183072844596F00CF3FE2 /* OpenGL.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -9,6 +9,7 @@
 #include "GLTools.h"
 #include <GLUT/glut.h>
 
+#pragma mark --使用固定管线绘制四边形案例
 GLBatch triangleBatch;
 
 GLShaderManager shaderManager;
@@ -25,7 +26,6 @@ GLfloat vVerts[] = {
 };
 
 //窗口大小改变时接受新的宽度和高度，其中0,0代表窗口中视口的左下角坐标，w，h代表像素
-
 void ChangeSize(int w,int h)
 {
     glViewport(0,0, w, h);
@@ -58,7 +58,18 @@ void SetupRC()
 
 void RenderScene(void)
 {
-    //清除一个或一组特定的缓冲区
+    /*
+     清除缓存区对数值进行预置
+     参数：指定将要清楚的缓存区的遮罩的按位或运算。
+     GL_COLOR_BUFFER_BIT: 指示当前激活的用来进行颜色写入缓存区
+     GL_DEPTH_BUFFER_BIT:指示深度缓存区
+     GL_STENCIL_BUFFER_BIT:指示模板缓存区
+
+     每个缓存区的清楚值根据这个缓存区的清楚值设置不同。
+     
+     错误：
+     如果设定不是以上三个参考值，返回GL_INVALID_VALUE
+     */
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
     
     //设置一组浮点数来表示红色
@@ -150,8 +161,8 @@ void SpecialKeys(int key, int x, int y){
     glutPostRedisplay();
 }
 
-int main(int argc,char *argv[])
-{
+//设置多边形的初始化内容，包括一系列注册函数
+int setupDefaultRectangle(int argc,char *argv[]) {
     //设置当前工作目录，针对MAC OS X
     /*
      `GLTools`函数`glSetWorkingDrectory`用来设置当前工作目录。实际上在Windows中是不必要的，因为工作目录默认就是与程序可执行执行程序相同的目录。但是在Mac OS X中，这个程序将当前工作文件夹改为应用程序捆绑包中的`/Resource`文件夹。`GLUT`的优先设定自动进行了这个中设置，但是这样中方法更加安全。
@@ -187,7 +198,7 @@ int main(int argc,char *argv[])
     //注册显示函数
     glutDisplayFunc(RenderScene);
 
-    //注册特殊函数,例如：键盘响应
+    //注册特殊键位响应函数,当用户使用键盘按下特殊按键会相应
     glutSpecialFunc(SpecialKeys);
     
     /*
@@ -205,5 +216,154 @@ int main(int argc,char *argv[])
     SetupRC();
     
     glutMainLoop();
+    
+    return 0;
+}
+
+
+#pragma mark --直接绘制四边形系列
+void drawRectangle() {
+    //设置黑色背景
+    glClearColor(0, 0, 0, 1);
+    glClear(GL_COLOR_BUFFER_BIT);
+    
+    glColor3f(1, 0, 0);//设置红色
+    
+    //设置绘图是的坐标系统，可以设置大小和正负，以更新边界位置
+    //如果基本值是10，那么范围就是-10~10，而不是默认的-1~1
+    //左、右、上、下、近、远
+    glOrtho(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f);
+    
+    //开始绘制多边形，连接多个点形成闭环，有点像coreGraphics框架的使用
+    glBegin(GL_POLYGON);
+    
+    glVertex3f(-0.1f, -0.1f, 0);
+    glVertex3f(0.1f, -0.1f, 0);
+    glVertex3f(0.1f, 0.1f, 0);
+    glVertex3f(-0.1f, 0.1f, 0);
+    
+    //结束绘制
+    glEnd();
+    //强制刷新缓存区，保证绘制后立即显示
+    glFlush();
+}
+
+int setupDrawRectangle(int argc,char *argv[]) {
+    //1.初始化一个GLUT库
+    glutInit(&argc, (char **)argv);
+    
+    //2.创建一个窗口并制定窗口名
+    glutInitWindowSize(800, 600);
+    glutCreateWindow("CC_Window");
+    
+    //3.注册一个绘图函数，操作系统在必要时刻就会对窗体进行重绘制操作
+    //它设置了一个显示回调（diplay callback），即GLUT在每次更新窗口内容的时候回自动调用该例程
+    glutDisplayFunc(drawRectangle);
+    
+    //这是一个无限执行的循环，它会负责一直处理窗口和操作系统的用户输入等操作。（注意：不会执行在glutMainLoop()之后的所有命令。）
+    glutMainLoop();
+    return 0;
+}
+
+#pragma mark --直接绘制圆形系列
+void drawCircle() {
+    glClearColor(0, 0, 0, 1);
+    glClear(GL_COLOR_BUFFER_BIT);
+    
+    glColor3f(1, 0, 0);
+    //画圆实际上就是多边形，连接多个点形成闭环
+    glBegin(GL_POLYGON);
+    
+    GLfloat R = 0.5f;//为圆的半径
+    int n = 64;//n个边，即：n边形，画圆形只能靠边数多来解决问题
+    GLfloat angle = 2 * M_PI / n;
+    //如果想画椭圆，那么两个轴的R不一致即可，精准可以使用椭圆公式
+    for (int i = 0; i < n; i++) {
+        glVertex3f(R * cos(angle * i), R * sin(angle * i), 0);
+    }
+    
+    glEnd();
+    glFlush();
+}
+
+int setupDrawCircle(int argc,char *argv[]) {
+    //1.初始化一个GLUT库
+    glutInit(&argc, (char **)argv);
+    
+    //2.创建一个窗口并制定窗口名
+    glutInitWindowSize(800, 800); //如果设置800*600,由于按照百分比设置，那么里面画的圆则不为圆形而是椭圆
+    glutCreateWindow("CC_Window");
+    
+    //3.注册一个绘图函数，操作系统在必要时刻就会对窗体进行重绘制操作
+    //它设置了一个显示回调（diplay callback），即GLUT在每次更新窗口内容的时候回自动调用该例程
+    glutDisplayFunc(drawCircle);
+    
+    //这是一个无限执行的循环，它会负责一直处理窗口和操作系统的用户输入等操作。（注意：不会执行在glutMainLoop()之后的所有命令。）
+    glutMainLoop();
+    return 0;
+}
+
+#pragma mark --绘制波状线，正弦余弦系列
+void drawWave() {
+    glClearColor(0, 0, 0, 1);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glColor3f(1, 0, 0);
+    
+    GLfloat radio = 10;
+    
+    glOrtho(-radio, radio, radio, -radio, -radio, radio);
+    
+    //绘制坐标轴,独立线段,两个点画一条，该参数线条不会连接诶起来
+    
+    glBegin(GL_LINES);
+    glVertex3f(-radio, 0, 0);
+    glVertex3f(radio, 0, 0);
+    glVertex3f(0, -radio, 0);
+    glVertex3f(0, radio, 0);
+    glEnd();
+    
+    //绘制正弦曲线,首尾不会连接起来，GL_LINE_LOOP会首尾连接起来
+    glBegin(GL_LINE_STRIP);
+    //每一度对应的弧度
+    GLfloat identifyAngle = M_PI / 180;
+    GLfloat R = 0.5f * radio;
+    //默认2π一个周期，使用2个周期
+    for (GLfloat i = -M_PI * 2; i < M_PI * 2; i += identifyAngle) {
+        //sin(ω*x),w决定周期参数，2π/|ω|
+        //这案例就是简易的从左往右递增度数，w增大可以增加周期数量
+        glVertex3f(i, R * sin(2*i), 0);
+    }
+    glEnd();
+    
+    glFlush();
+}
+
+int setupDrawWave(int argc,char *argv[]) {
+    //1.初始化一个GLUT库
+    glutInit(&argc, (char **)argv);
+    
+    //2.创建一个窗口并制定窗口名
+    glutInitWindowSize(800, 600);
+    glutCreateWindow("CC_Window");
+    
+    //3.注册一个绘图函数，操作系统在必要时刻就会对窗体进行重绘制操作
+    //它设置了一个显示回调（diplay callback），即GLUT在每次更新窗口内容的时候回自动调用该例程
+    glutDisplayFunc(drawWave);
+    
+    //这是一个无限执行的循环，它会负责一直处理窗口和操作系统的用户输入等操作。（注意：不会执行在glutMainLoop()之后的所有命令。）
+    glutMainLoop();
+    return 0;
+}
+
+int main(int argc,char *argv[])
+{
+//    return setupDefaultRectangle(argc, argv);
+    
+//    return setupDrawRectangle(argc, argv);
+    
+//    return setupDrawCircle(argc, argv);
+    
+    return setupDrawWave(argc, argv);
+    
     return  0;
 }
